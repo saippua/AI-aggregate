@@ -81,7 +81,7 @@ const modelHandlers: Record<ModelName, ModelHandler> = {
       return data.content[0].text;
     }
   },
-  
+
   chatgpt: {
     config: modelConfigs.chatgpt,
     callAPI: async (prompt: string, apiKey: string) => {
@@ -107,7 +107,7 @@ const modelHandlers: Record<ModelName, ModelHandler> = {
       return data.choices[0].message.content;
     }
   },
-  
+
   gemini: {
     config: modelConfigs.gemini,
     callAPI: async (prompt: string, apiKey: string) => {
@@ -138,13 +138,13 @@ const modelHandlers: Record<ModelName, ModelHandler> = {
         `https://api.x.ai/v1/responses`,
         {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify({
             input: [
-              { 
+              {
                 role: "system",
                 content: "You are Grok, an extremely intelligent, helpful AI assistant."
               },
@@ -201,7 +201,7 @@ export default function MultiModelChat() {
 
   const handleModelAPICall = async (model: ModelName, userPrompt: string) => {
     setLoading(prev => ({ ...prev, [model]: true }));
-    
+
     try {
       if (!apiKeys[model]) {
         throw new Error(`${modelConfigs[model].name} API key not set. Please configure it in settings.`);
@@ -209,7 +209,7 @@ export default function MultiModelChat() {
 
       const response = await modelHandlers[model].callAPI(userPrompt, apiKeys[model]);
       const assistantMessage: Message = { role: 'assistant', content: response };
-      
+
       setMessages(prev => ({
         ...prev,
         [model]: [...prev[model], assistantMessage]
@@ -229,13 +229,13 @@ export default function MultiModelChat() {
     if (!prompt.trim() || Object.values(loading).some(l => l)) return;
 
     const userMessage: Message = { role: 'user', content: prompt };
-    
-    setMessages(prev => 
+
+    setMessages(prev =>
       Object.fromEntries(
         modelNames.map(model => [model, [...prev[model], userMessage]])
       ) as Record<ModelName, Message[]>
     );
-    
+
     const currentPrompt = prompt;
     setPrompt('');
     setErrors(createModelState(''));
@@ -297,7 +297,7 @@ export default function MultiModelChat() {
               </div>
             ))
           )}
-          
+
           {loading[activeTab] && (
             <div className="message-container assistant">
               <div className="loading-bubble">
@@ -329,9 +329,9 @@ export default function MultiModelChat() {
               className="message-input"
               disabled={isAnyLoading}
             />
-            <button 
-              onClick={handleSubmit} 
-              disabled={isAnyLoading || !prompt.trim()} 
+            <button
+              onClick={handleSubmit}
+              disabled={isAnyLoading || !prompt.trim()}
               className="submit-button"
             >
               {isAnyLoading ? <Loader2 size={20} className="spinner" /> : <Send size={20} />}
