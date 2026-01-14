@@ -205,17 +205,18 @@ export default function MultiModelChat() {
       <div className="main-card">
         <div className="header">
           <div>
-            <h1 className="header-title">Multi-Model AI Chat</h1>
-            <p className="header-subtitle">Compare responses from Claude, ChatGPT, and Gemini</p>
+            <h1 className="header-title">AI Aggregate</h1>
+            <p className="header-subtitle">Compare responses from different AI sources</p>
           </div>
           <button onClick={openSettings} className="settings-button">
             <Settings size={24} />
           </button>
         </div>
 
-        <div className="tabs-container">
+        <div className="tabs-container" >
           {modelNames.map((model) => (
             <button
+              hidden={!apiKeys[model]}
               key={model}
               onClick={() => setActiveTab(model)}
               className={`tab ${activeTab === model ? 'tab-active' : ''}`}
@@ -225,9 +226,11 @@ export default function MultiModelChat() {
                 {loading[model] && <Loader2 size={16} className="spinner" />}
                 {!apiKeys[model] && <span className="tab-badge">No API Key</span>}
               </div>
-              {activeTab === model && (
-                <div className={`tab-indicator gradient-${modelConfigs[model].gradient}`} />
-              )}
+              {
+                activeTab === model && (
+                  <div className={`tab-indicator gradient-${modelConfigs[model].gradient}`} />
+                )
+              }
             </button>
           ))}
         </div>
@@ -235,7 +238,6 @@ export default function MultiModelChat() {
         <div className="chat-area">
           {messages[activeTab].length === 0 ? (
             <div className="empty-state">
-              <p className="empty-state-title">Start a conversation with {modelConfigs[activeTab].name}</p>
               <p className="empty-state-subtitle">Your message will be sent to all models simultaneously</p>
               {!apiKeys[activeTab] && (
                 <p className="empty-state-warning">⚠️ Please set up your API key in settings first</p>
