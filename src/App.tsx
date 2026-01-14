@@ -7,7 +7,7 @@ interface Message {
   content: string;
 }
 
-type ModelName = 'claude' | 'chatgpt' | 'gemini';
+type ModelName = 'claude' | 'chatgpt' | 'gemini' | 'grok';
 
 interface ModelConfig {
   name: string;
@@ -43,6 +43,13 @@ const modelConfigs: Record<ModelName, ModelConfig> = {
     apiKeyLabel: 'Google AI API Key',
     placeholder: 'AIza...',
     helpUrl: 'makersuite.google.com/app/apikey'
+  },
+  grok: {
+    name: 'Grok',
+    gradient: 'black-gray',
+    apiKeyLabel: 'xAI API Key',
+    placeholder: 'xai-...',
+    helpUrl: 'console.x.ai/home'
   }
 };
 
@@ -122,13 +129,50 @@ const modelHandlers: Record<ModelName, ModelHandler> = {
       const data = await response.json();
       return data.candidates[0].content.parts[0].text;
     }
+  },
+  grok: {
+    config: modelConfigs.grok,
+    callAPI: async (prompt: string, apiKey: string) => {
+      const response = await fetch(
+        `https://api.x.ai/v1/responses`,
+        {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            input: [
+              { 
+                role: "system",
+                content: "You are Grok, an extremely intelligent, helpful AI assistant."
+              },
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            model: "grok-4"
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      return data.output[0].content[0].text;
+    }
   }
 };
 
 const createModelState = <T,>(initialValue: T): Record<ModelName, T> => ({
   claude: initialValue,
   chatgpt: initialValue,
-  gemini: initialValue
+  gemini: initialValue,
+  grok: initialValue
 });
 
 export default function MultiModelChat() {
