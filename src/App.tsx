@@ -240,10 +240,11 @@ export default function MultiModelChat() {
     setPrompt('');
     setErrors(createModelState(''));
 
-    modelNames.forEach(model => handleModelAPICall(model, currentPrompt));
+    modelNames.forEach(model => apiKeys[model] && handleModelAPICall(model, currentPrompt));
   };
 
   const isAnyLoading = Object.values(loading).some(l => l);
+  const isAnyReady = Object.values(apiKeys).some(l => l);
 
   return (
     <div className="app-container">
@@ -283,15 +284,16 @@ export default function MultiModelChat() {
         <div className="chat-area">
           {messages[activeTab].length === 0 ? (
             <div className="empty-state">
-              <p className="empty-state-subtitle">Your message will be sent to all models simultaneously</p>
+              <p className="empty-state-subtitle">Your message will be sent to all models simultaneously.</p>
               {!apiKeys[activeTab] && (
-                <p className="empty-state-warning">⚠️ Please set up your API key in settings first</p>
+                Object.values(apiKeys).every(v => !v) &&
+                <p className="empty-state-warning">⚠️ Start by setting up your API key(s) in settings first</p>
               )}
             </div>
           ) : (
             messages[activeTab].map((msg, idx) => (
               <div key={idx} className={`message-container ${msg.role}`}>
-                <div className={`message-bubble ${msg.role} ${msg.role === 'user' ? `gradient-${modelConfigs[activeTab].gradient}` : ''}`}>
+                <div className={`message-bubble ${msg.role} ${msg.role === 'assistant' ? `gradient-${modelConfigs[activeTab].gradient}` : ''}`}>
                   <p><Markdown>{msg.content}</Markdown></p>
                 </div>
               </div>
@@ -325,13 +327,13 @@ export default function MultiModelChat() {
                   handleSubmit(e);
                 }
               }}
-              placeholder="Type your message to send to all models..."
+              placeholder="Type your message here..."
               className="message-input"
-              disabled={isAnyLoading}
+              disabled={isAnyLoading || !isAnyReady}
             />
             <button
               onClick={handleSubmit}
-              disabled={isAnyLoading || !prompt.trim()}
+              disabled={isAnyLoading || !isAnyReady || !prompt.trim()}
               className="submit-button"
             >
               {isAnyLoading ? <Loader2 size={20} className="spinner" /> : <Send size={20} />}
@@ -354,22 +356,23 @@ export default function MultiModelChat() {
             <div className="modal-body">
               {modelNames.map((model) => (
                 <div key={model} className="form-group">
-                  <label>{modelConfigs[model].apiKeyLabel}</label>
-                  <div className="input-group">
-                    <input
-                      type={showApiKeys[model] ? 'text' : 'password'}
-                      value={tempApiKeys[model]}
-                      onChange={(e) => setTempApiKeys(prev => ({ ...prev, [model]: e.target.value }))}
-                      placeholder={modelConfigs[model].placeholder}
-                      className="password-input"
-                    />
-                    <button
-                      onClick={() => setShowApiKeys(prev => ({ ...prev, [model]: !prev[model] }))}
-                      className="toggle-button"
-                    >
-                      {showApiKeys[model] ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
+                  <label>{modelConfigs[model].apiKeyLabel}
+                    <div className="input-group">
+                      <input
+                        type={showApiKeys[model] ? 'text' : 'password'}
+                        value={tempApiKeys[model]}
+                        onChange={(e) => setTempApiKeys(prev => ({ ...prev, [model]: e.target.value }))}
+                        placeholder={modelConfigs[model].placeholder}
+                        className="password-input"
+                      />
+                      <button
+                        onClick={() => setShowApiKeys(prev => ({ ...prev, [model]: !prev[model] }))}
+                        className="toggle-button"
+                      >
+                        {showApiKeys[model] ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </label>
                   <p className="help-text">Get your key from {modelConfigs[model].helpUrl}</p>
                 </div>
               ))}
