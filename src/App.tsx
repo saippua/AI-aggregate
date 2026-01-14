@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Loader2, Settings, X, Eye, EyeOff } from 'lucide-react';
 import './App.css';
+import Markdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -291,7 +292,7 @@ export default function MultiModelChat() {
             messages[activeTab].map((msg, idx) => (
               <div key={idx} className={`message-container ${msg.role}`}>
                 <div className={`message-bubble ${msg.role} ${msg.role === 'user' ? `gradient-${modelConfigs[activeTab].gradient}` : ''}`}>
-                  <p>{msg.content}</p>
+                  <p><Markdown>{msg.content}</Markdown></p>
                 </div>
               </div>
             ))
