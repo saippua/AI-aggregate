@@ -84,7 +84,7 @@ const modelHandlers: Record<ModelName, ModelHandler> = {
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'gpt-5-nano',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 1000,
         }),
@@ -104,7 +104,7 @@ const modelHandlers: Record<ModelName, ModelHandler> = {
     config: modelConfigs.gemini,
     callAPI: async (prompt: string, apiKey: string) => {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
